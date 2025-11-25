@@ -31,7 +31,7 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                     <dl>
-                        <dt class="text-base font-medium text-gray-500 truncate">Total Variabel</dt>
+                        <dt class="text-base font-medium text-gray-500 truncate">Total Indikator</dt>
                         <dd class="text-3xl font-bold text-gray-900">{{ $totalVariabel }}</dd>
                     </dl>
                 </div>
