@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    /* Custom Fonts */
+    --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+
+    --color-primary: #0ba6df;
+    --color-secondary: #48b3af;
+    --color-third: #dc143c;
+    --color-fourth: #ef7722;
+    --color-fifth: #a7e399;
+    --color-sixth: #faa533;
+    --color-seventh: #e6d8c3;
+}
+
+.small-card {
+    @apply bg-white overflow-hidden shadow rounded-lg;
+}
+
+.btn-primary {
+    @apply bg-primary text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+}
+
+.thead {
+    @apply bg-gray-300;
+}
+
+.th {
+    @apply px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider;
+}
+
+.th-2 {
+    @apply px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider;
+}
+
+.input-custom {
+    @apply p-2 w-full rounded-md border-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+.input-custom-disabled {
+    @apply p-2 w-full rounded-md border-gray-300 bg-gray-100 shadow-sm cursor-not-allowed;
+}
+
+.textarea-custom {
+    @apply p-2 w-full rounded-md border-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+.select-custom {
+    @apply p-2 rounded-md border-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+.file-custom {
+    @apply p-2 w-full rounded-md border-1 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
