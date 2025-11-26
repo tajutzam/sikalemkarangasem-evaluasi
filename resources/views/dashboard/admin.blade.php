@@ -38,7 +38,9 @@
             </div>
         </div>
         <div class="bg-gray-50 px-5 py-3">
-            <span class="text-sm text-gray-500">Variabel evaluasi</span>
+            <a href="{{ route('variabel.index') }}" class="text-sm text-primary hover:text-blue-800">
+                Lihat semua →
+            </a>
         </div>
     </div>
 

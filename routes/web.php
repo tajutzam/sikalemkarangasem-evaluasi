@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\TingkatController;
+use App\Http\Controllers\VariableController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -19,12 +21,18 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::resource('variabel', VariableController::class);
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::resource('instansi', InstansiController::class);
+
+
+    Route::resource('tingkat', TingkatController::class);
+
 
     Route::get('/evaluation-details/{id}/download', [EvaluationController::class, 'downloadFile'])->name('evaluations.download-file');
     Route::post('/evaluation-details/{id}/delete-file', [EvaluationController::class, 'deleteFile'])->name('evaluations.delete-file');
