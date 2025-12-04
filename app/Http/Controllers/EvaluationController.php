@@ -125,7 +125,7 @@ class EvaluationController extends Controller
     public function show(Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
+            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
         $evaluation->load(['instansi', 'user', 'details.variabel.tingkat', 'details.tingkat']);
@@ -136,7 +136,7 @@ class EvaluationController extends Controller
     public function edit(Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
+            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
         $evaluation->load(['instansi', 'details.variabel.tingkat', 'details.tingkat']);
@@ -147,7 +147,7 @@ class EvaluationController extends Controller
     public function update(Request $request, Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
+            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
         if (!$evaluation->canBeEdited()) {
@@ -202,7 +202,7 @@ class EvaluationController extends Controller
     public function destroy(Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
+            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
         if (!$evaluation->isDraft()) {
@@ -225,7 +225,7 @@ class EvaluationController extends Controller
     {
         // Check authorization: admin can submit all, users can only submit their own
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
+            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
         if (!$evaluation->canBeEdited()) {
