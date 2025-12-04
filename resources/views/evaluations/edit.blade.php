@@ -168,9 +168,12 @@
                                         Pilih satu atau lebih file baru untuk ditambahkan ke bukti.
                                         Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max: 5MB per file)
                                     </p>
-                                    @error("details.{$detail->id}.new_bukti_dokumen.*")
-                                        <p class="mt-1 text-sm text-red-600">Terjadi kesalahan pada salah satu file yang diunggah.</p>
-                                    @enderror
+                                    @if($errors->has("details.{$detail->id}.new_bukti_dokumen.*"))
+    @foreach($errors->get("details.{$detail->id}.new_bukti_dokumen.*") as $msg)
+        <p class="mt-1 text-sm text-red-600">{{ $msg[0] }}</p>
+    @endforeach
+@endif
+
                                 @endif
                             </div>
 
