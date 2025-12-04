@@ -12,7 +12,6 @@ class EvaluationDetail extends Model
         'evaluation_id',
         'variabel_id',
         'tingkat_id',
-        'bukti_dokumen',
         'keterangan',
     ];
 
@@ -20,6 +19,12 @@ class EvaluationDetail extends Model
     {
         return $this->belongsTo(Evaluation::class);
     }
+
+    public function buktiDokumen()
+    {
+        return $this->hasMany(BuktiDokumen::class, 'evaliation_detail_id');
+    }
+
 
     public function variabel()
     {

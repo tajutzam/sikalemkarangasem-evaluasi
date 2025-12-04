@@ -44,4 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/evaluations/{evaluation}/reject', [EvaluationController::class, 'reject'])->name('evaluations.reject');
 
     Route::resource('users', UserController::class);
+
+    Route::delete('/bukti-dokumen/{bukti}', [EvaluationController::class, 'deleteSingleFile'])
+        ->name('evaluations.delete-single-file');
 });

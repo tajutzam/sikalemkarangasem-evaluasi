@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BuktiDokumen;
 use App\Models\Evaluation;
 use App\Models\EvaluationDetail;
 use App\Models\Instansi;
@@ -106,7 +107,6 @@ class EvaluationController extends Controller
                     'evaluation_id' => $evaluation->id,
                     'variabel_id' => $variabel->id,
                     'tingkat_id' => null,
-                    'bukti_dokumen' => null,
                     'keterangan' => null,
                 ]);
             }
@@ -133,6 +133,27 @@ class EvaluationController extends Controller
         return view('evaluations.show', compact('evaluation'));
     }
 
+    public function deleteSingleFile($id)
+    {
+        $bukti = BuktiDokumen::find($id);
+
+        if (!$bukti) {
+            return response()->json(['success' => false, 'message' => 'File tidak ditemukan.']);
+        }
+
+        if ($bukti->file_path && Storage::disk('public')->exists($bukti->file_path)) {
+            Storage::disk('public')->delete($bukti->file_path);
+        }
+
+        $bukti->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'File berhasil dihapus.'
+        ]);
+    }
+
+
     public function edit(Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
@@ -143,11 +164,10 @@ class EvaluationController extends Controller
 
         return view('evaluations.edit', compact('evaluation'));
     }
-
     public function update(Request $request, Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
+            // return back()->with('error', 'Anda tidak memiliki akses untuk mengedit lembar kerja ini!');
         }
 
         if (!$evaluation->canBeEdited()) {
@@ -157,35 +177,35 @@ class EvaluationController extends Controller
         $request->validate([
             'details' => 'required|array',
             'details.*.tingkat_id' => 'nullable|exists:tingkat,id',
-            'details.*.bukti_dokumen' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'details.*.new_bukti_dokumen.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
             'details.*.keterangan' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
         try {
             foreach ($request->details as $detailId => $data) {
+
                 $detail = EvaluationDetail::find($detailId);
+
                 if ($detail && $detail->evaluation_id == $evaluation->id) {
-                    $updateData = [
+
+                    $detail->update([
                         'tingkat_id' => $data['tingkat_id'] ?? null,
                         'keterangan' => $data['keterangan'] ?? null,
-                    ];
+                    ]);
 
-                    // Handle file upload
-                    if ($request->hasFile("details.{$detailId}.bukti_dokumen")) {
-                        // Delete old file if exists
-                        if ($detail->bukti_dokumen && Storage::disk('public')->exists($detail->bukti_dokumen)) {
-                            Storage::disk('public')->delete($detail->bukti_dokumen);
+                    if ($request->hasFile("details.$detailId.new_bukti_dokumen")) {
+
+                        foreach ($request->file("details.$detailId.new_bukti_dokumen") as $file) {
+
+                            $path = $file->store('evaluations', 'public');
+
+                            \App\Models\BuktiDokumen::create([
+                                'evaliation_detail_id' => $detail->id,
+                                'file_path' => $path,
+                            ]);
                         }
-
-                        // Store new file
-                        $file = $request->file("details.{$detailId}.bukti_dokumen");
-                        $fileName = time() . '_' . $detailId . '_' . $file->getClientOriginalName();
-                        $filePath = $file->storeAs('evaluations', $fileName, 'public');
-                        $updateData['bukti_dokumen'] = $filePath;
                     }
-
-                    $detail->update($updateData);
                 }
             }
 
@@ -193,9 +213,11 @@ class EvaluationController extends Controller
 
             return redirect()->route('evaluations.edit', $evaluation->id)
                 ->with('success', 'Lembar kerja berhasil diupdate!');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal mengupdate lembar kerja: ' . $e->getMessage());
+            \Log::error('Gagal update: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem.');
         }
     }
 

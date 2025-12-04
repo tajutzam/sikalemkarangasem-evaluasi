@@ -47,7 +47,7 @@
                             </p>
                             <div class="w-32 bg-gray-200 rounded-full h-2 mt-1">
                                 <div class="bg-blue-600 h-2 rounded-full"
-                                     style="width: {{ $evaluation->getCompletionPercentage() }}%"></div>
+                                    style="width: {{ $evaluation->getCompletionPercentage() }}%"></div>
                             </div>
                         </div>
                     </div>
@@ -95,14 +95,14 @@
                                     @foreach($detail->variabel->tingkat as $tingkat)
                                         <div class="relative">
                                             <label class="flex items-start p-4 border rounded-lg cursor-pointer transition-colors"
-                                                   :class="selectedTingkat === {{ $tingkat->id }} ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-300'">
+                                                    :class="selectedTingkat === {{ $tingkat->id }} ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-300'">
                                                 <input type="radio"
-                                                       name="details[{{ $detail->id }}][tingkat_id]"
-                                                       value="{{ $tingkat->id }}"
-                                                       {{ $detail->tingkat_id == $tingkat->id ? 'checked' : '' }}
-                                                       @click="selectedTingkat = {{ $tingkat->id }}"
-                                                       class="mt-1 focus:ring-blue-500 text-blue-600"
-                                                       {{ $evaluation->canBeEdited() ? '' : 'disabled' }}>
+                                                            name="details[{{ $detail->id }}][tingkat_id]"
+                                                            value="{{ $tingkat->id }}"
+                                                            {{ $detail->tingkat_id == $tingkat->id ? 'checked' : '' }}
+                                                            @click="selectedTingkat = {{ $tingkat->id }}"
+                                                            class="mt-1 focus:ring-blue-500 text-blue-600"
+                                                            {{ $evaluation->canBeEdited() ? '' : 'disabled' }}>
                                                 <div class="ml-3 flex-1">
                                                     <div class="font-medium text-gray-900">
                                                         Tingkat {{ $tingkat->tingkat }}
@@ -117,51 +117,60 @@
                                 </div>
                             </div>
 
-                            <!-- Bukti Dokumen -->
-                            <div class="mb-4">
-                                <label for="bukti_{{ $detail->id }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Bukti Dokumen
+                            <!-- Bukti Dokumen (Multi File) -->
+                            <div class="mb-4" id="bukti-container-{{ $detail->id }}">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Bukti Dokumen (Multiple Files)
                                 </label>
 
-                                @if($detail->bukti_dokumen)
-                                    <div class="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md flex items-center justify-between" id="file-container-{{ $detail->id }}">
-                                        <div class="flex items-center space-x-3">
-                                            <i class="fas fa-file-alt text-blue-500 text-3xl"></i>
-                                            <div>
-                                                <p class="text-sm font-medium text-gray-900">
-                                                    {{ basename($detail->bukti_dokumen) }}
+                                <!-- List File Bukti Saat Ini (dari relasi baru) -->
+                                @if($detail->buktiDokumen->count() > 0)
+                                    <p class="text-xs text-gray-500 mb-2">Total {{ $detail->buktiDokumen->count() }} file terlampir:</p>
+                                    <div class="space-y-2 mb-3">
+                                        @foreach($detail->buktiDokumen as $bukti)
+                                        <div class="p-3 bg-gray-50 border border-gray-200 rounded-md flex items-center justify-between transition-opacity duration-300" id="file-bukti-{{ $bukti->id }}">
+                                            <div class="flex items-center space-x-3 truncate">
+                                                <i class="fas fa-file-alt text-blue-500 shrink-0"></i>
+                                                <p class="text-sm font-medium text-gray-900 truncate">
+                                                    {{ basename($bukti->file_path) }}
                                                 </p>
-                                                <p class="text-xs text-gray-500">File saat ini</p>
+                                            </div>
+                                            <div class="flex space-x-2 shrink-0">
+                                                <a href="{{ asset('storage/' . $bukti->file_path) }}"
+                                                    target="_blank"
+                                                    class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                                                        Download
+                                                    </a>
+
+                                                @if($evaluation->canBeEdited())
+                                                    <!-- Gunakan ID bukti (bukan detail) untuk penghapusan single file -->
+                                                    <button type="button"
+                                                            onclick="deleteSingleFile({{ $bukti->id }})"
+                                                            class="px-3 py-1 text-sm text-red-600 hover:text-red-800 transition-colors">
+                                                        Hapus
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('evaluations.download-file', $detail->id) }}"
-                                               class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                                                Download
-                                            </a>
-                                            @if($evaluation->canBeEdited())
-                                                <button type="button"
-                                                        onclick="deleteFile({{ $detail->id }})"
-                                                        class="px-3 py-1 text-sm text-red-600 hover:text-red-800 transition-colors">
-                                                    Hapus
-                                                </button>
-                                            @endif
-                                        </div>
+                                        @endforeach
                                     </div>
                                 @endif
 
                                 @if($evaluation->canBeEdited())
+                                    <!-- Input File Baru (Multiple) -->
                                     <input type="file"
-                                           name="details[{{ $detail->id }}][bukti_dokumen]"
-                                           id="bukti_{{ $detail->id }}"
-                                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                                           class="file-custom">
+                                            name="details[{{ $detail->id }}][new_bukti_dokumen][]"
+                                            id="new_bukti_{{ $detail->id }}"
+                                            multiple
+                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                                            class="file-custom">
                                     <p class="mt-1 text-xs text-gray-500">
-                                        Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max: 5MB)
-                                        @if($detail->bukti_dokumen)
-                                            <br>Upload file baru untuk mengganti file yang ada
-                                        @endif
+                                        Pilih satu atau lebih file baru untuk ditambahkan ke bukti.
+                                        Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max: 5MB per file)
                                     </p>
+                                    @error("details.{$detail->id}.new_bukti_dokumen.*")
+                                        <p class="mt-1 text-sm text-red-600">Terjadi kesalahan pada salah satu file yang diunggah.</p>
+                                    @enderror
                                 @endif
                             </div>
 
@@ -171,11 +180,11 @@
                                     Keterangan
                                 </label>
                                 <textarea name="details[{{ $detail->id }}][keterangan]"
-                                          id="keterangan_{{ $detail->id }}"
-                                          rows="3"
-                                          placeholder="Tambahkan keterangan atau catatan tambahan..."
-                                          class="textarea-custom"
-                                          {{ $evaluation->canBeEdited() ? '' : 'disabled' }}>{{ old('details.' . $detail->id . '.keterangan', $detail->keterangan) }}</textarea>
+                                            id="keterangan_{{ $detail->id }}"
+                                            rows="3"
+                                            placeholder="Tambahkan keterangan atau catatan tambahan..."
+                                            class="textarea-custom"
+                                            {{ $evaluation->canBeEdited() ? '' : 'disabled' }}>{{ old('details.' . $detail->id . '.keterangan', $detail->keterangan) }}</textarea>
                             </div>
                         </div>
                     @endforeach
@@ -203,34 +212,33 @@
 </div>
 
 <script>
-function deleteFile(detailId) {
-    if (!confirm('Apakah Anda yakin ingin menghapus file ini?')) {
+function deleteSingleFile(buktiId) {
+  
+    if (!confirm('Apakah Anda yakin ingin menghapus file bukti ini?')) {
         return;
     }
 
-    // Show loading state
     const button = event.target;
     const originalText = button.innerHTML;
     button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Hapus...';
 
     $.ajax({
-        url: '/evaluation-details/' + detailId + '/delete-file',
+        url: '/bukti-dokumen/' + buktiId,
         type: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        data: {
+             _token: $('meta[name="csrf-token"]').attr('content'),
+             _method: 'DELETE'
         },
         success: function(response) {
             if (response.success) {
-                // Remove file container
-                $('#file-container-' + detailId).fadeOut(300, function() {
+                // Hapus container file dari DOM
+                $('#file-bukti-' + buktiId).fadeOut(300, function() {
                     $(this).remove();
                 });
 
-                // Show success message
                 showMessage('success', response.message);
             } else {
-                // Show error message
                 showMessage('error', response.message);
                 button.disabled = false;
                 button.innerHTML = originalText;
@@ -259,10 +267,8 @@ function showMessage(type, message) {
         </div>
     `;
 
-    // Insert after header
     $('.max-w-7xl').prepend(alertHtml);
 
-    // Auto remove after 5 seconds
     setTimeout(function() {
         $('.alert-message').fadeOut(300, function() {
             $(this).remove();
