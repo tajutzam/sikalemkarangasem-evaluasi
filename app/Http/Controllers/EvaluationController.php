@@ -125,10 +125,9 @@ class EvaluationController extends Controller
     public function show(Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
-        $evaluation->load(['instansi', 'user', 'details.variabel.tingkat', 'details.tingkat']);
+        $evaluation->load(['instansi', 'user', 'details.variabel.tingkat', 'details.tingkat', 'buktiDokumen']);
 
         return view('evaluations.show', compact('evaluation'));
     }
@@ -215,7 +214,7 @@ class EvaluationController extends Controller
         }
 
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120'
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:10120'
         ]);
 
         $path = $request->file('file')->store('evaluations', 'public');
