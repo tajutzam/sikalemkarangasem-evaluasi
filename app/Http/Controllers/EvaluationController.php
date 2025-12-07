@@ -238,19 +238,25 @@ class EvaluationController extends Controller
     public function destroy(Evaluation $evaluation)
     {
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
-            //            abort(403, 'Anda tidak memiliki akses ke lembar kerja ini.');
         }
 
-        if (!$evaluation->isDraft()) {
-            return back()->with('error', 'Hanya lembar kerja dengan status draft yang dapat dihapus!');
-        }
-
+        // Loop semua detail
         foreach ($evaluation->details as $detail) {
-            if ($detail->bukti_dokumen && Storage::disk('public')->exists($detail->bukti_dokumen)) {
-                Storage::disk('public')->delete($detail->bukti_dokumen);
+
+            // Hapus semua file dari relasi buktiDokumen
+            foreach ($detail->buktiDokumen as $bukti) {
+
+                // Hapus file fisik
+                if (Storage::disk('public')->exists($bukti->file_path)) {
+                    Storage::disk('public')->delete($bukti->file_path);
+                }
+
+                // Hapus row dari database
+                $bukti->delete();
             }
         }
 
+        // Terakhir hapus evaluation-nya
         $evaluation->delete();
 
         return redirect()->route('evaluations.index')
