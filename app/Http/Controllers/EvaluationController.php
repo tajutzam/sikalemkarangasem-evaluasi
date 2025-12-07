@@ -127,7 +127,7 @@ class EvaluationController extends Controller
         if (!Auth::user()->is_admin && $evaluation->user_id !== Auth::id()) {
         }
 
-        $evaluation->load(['instansi', 'user', 'details.variabel.tingkat', 'details.tingkat', 'buktiDokumen']);
+        $evaluation->load(['instansi', 'user', 'details.variabel.tingkat', 'details.tingkat', 'details.buktiDokumen']);
 
         return view('evaluations.show', compact('evaluation'));
     }

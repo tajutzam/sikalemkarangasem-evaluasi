@@ -79,7 +79,8 @@ class Evaluation extends Model
     public function getCompletionPercentage(): float
     {
         $total = $this->details()->count();
-        if ($total === 0) return 0;
+        if ($total === 0)
+            return 0;
 
         $filled = $this->details()->whereNotNull('tingkat_id')->count();
         return round(($filled / $total) * 100, 2);
