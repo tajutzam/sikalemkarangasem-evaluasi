@@ -158,21 +158,21 @@
 
                                 @if($evaluation->canBeEdited())
                                     <!-- Input File Baru (Multiple) -->
-                                    <input type="file"
-                                            name="details[{{ $detail->id }}][new_bukti_dokumen][]"
-                                            id="new_bukti_{{ $detail->id }}"
-                                            multiple
-                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                                            class="file-custom">
+                                  <input type="file"
+                                    onchange="uploadBukti({{ $detail->id }})"
+                                    id="upload_{{ $detail->id }}"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                                    class="file-custom">
+
                                     <p class="mt-1 text-xs text-gray-500">
                                         Pilih satu atau lebih file baru untuk ditambahkan ke bukti.
                                         Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max: 5MB per file)
                                     </p>
                                     @if($errors->has("details.{$detail->id}.new_bukti_dokumen.*"))
-    @foreach($errors->get("details.{$detail->id}.new_bukti_dokumen.*") as $msg)
-        <p class="mt-1 text-sm text-red-600">{{ $msg[0] }}</p>
-    @endforeach
-@endif
+                                        @foreach($errors->get("details.{$detail->id}.new_bukti_dokumen.*") as $msg)
+                                            <p class="mt-1 text-sm text-red-600">{{ $msg[0] }}</p>
+                                        @endforeach
+                                    @endif
 
                                 @endif
                             </div>
@@ -259,6 +259,46 @@ function deleteSingleFile(buktiId) {
     });
 }
 
+
+    function uploadBukti(detailId) {
+        let fileInput = document.getElementById('upload_' + detailId);
+        let file = fileInput.files[0];
+
+        if (!file) return;
+
+        let formData = new FormData();
+        formData.append('file', file);
+        formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+        $.ajax({
+            url: `/evaluation-detail/${detailId}/upload-bukti`,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
+                showMessage('success', 'Mengupload...');
+            },
+            success: function (res) {
+                if (res.success) {
+                    // Tambahkan ke DOM tanpa reload
+                    let html = `
+                        <div id="file-bukti-${res.bukti.id}" 
+                            class="p-3 bg-gray-50 border rounded-md flex justify-between items-center mb-2">
+                            <span>${res.bukti.file_name}</span>
+                            <a href="${res.bukti.url}" target="_blank" class="text-blue-600">Download</a>
+                        </div>
+                    `;
+                    $("#bukti-container-" + detailId).append(html);
+                    showMessage('success', 'Upload berhasil!');
+                }
+            },
+            error: function (xhr) {
+                showMessage('error', xhr.responseJSON?.message ?? 'Upload gagal!');
+            }
+        });
+    }
+
 function showMessage(type, message) {
     const alertClass = type === 'success'
         ? 'bg-green-100 border-green-400 text-green-700'
@@ -276,7 +316,7 @@ function showMessage(type, message) {
         $('.alert-message').fadeOut(300, function() {
             $(this).remove();
         });
-    }, 5000);
+    }, 5000);    
 }
 </script>
 

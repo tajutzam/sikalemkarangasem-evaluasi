@@ -47,4 +47,7 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/bukti-dokumen/{bukti}', [EvaluationController::class, 'deleteSingleFile'])
         ->name('evaluations.delete-single-file');
+
+    Route::post('/evaluation-detail/{detail}/upload-bukti', [EvaluationController::class, 'uploadBukti']);
+
 });

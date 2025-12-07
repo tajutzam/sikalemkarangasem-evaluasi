@@ -177,7 +177,6 @@ class EvaluationController extends Controller
         $request->validate([
             'details' => 'required|array',
             'details.*.tingkat_id' => 'nullable|exists:tingkat,id',
-            'details.*.new_bukti_dokumen.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
             'details.*.keterangan' => 'nullable|string',
         ]);
 
@@ -193,19 +192,6 @@ class EvaluationController extends Controller
                         'tingkat_id' => $data['tingkat_id'] ?? null,
                         'keterangan' => $data['keterangan'] ?? null,
                     ]);
-
-                    if ($request->hasFile("details.$detailId.new_bukti_dokumen")) {
-
-                        foreach ($request->file("details.$detailId.new_bukti_dokumen") as $file) {
-
-                            $path = $file->store('evaluations', 'public');
-
-                            \App\Models\BuktiDokumen::create([
-                                'evaliation_detail_id' => $detail->id,
-                                'file_path' => $path,
-                            ]);
-                        }
-                    }
                 }
             }
 
@@ -220,6 +206,35 @@ class EvaluationController extends Controller
             return back()->with('error', 'Terjadi kesalahan sistem.');
         }
     }
+
+
+    public function uploadBukti(Request $request, EvaluationDetail $detail)
+    {
+        if (!$detail->evaluation->canBeEdited()) {
+            return response()->json(['success' => false, 'message' => 'Lembar kerja tidak dapat diedit!'], 403);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120'
+        ]);
+
+        $path = $request->file('file')->store('evaluations', 'public');
+
+        $bukti = BuktiDokumen::create([
+            'evaliation_detail_id' => $detail->id,
+            'file_path' => $path,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'bukti' => [
+                'id' => $bukti->id,
+                'file_name' => basename($bukti->file_path),
+                'url' => asset('storage/' . $bukti->file_path)
+            ]
+        ]);
+    }
+
 
     public function destroy(Evaluation $evaluation)
     {
